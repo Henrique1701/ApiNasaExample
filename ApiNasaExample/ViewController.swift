@@ -10,49 +10,36 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var picker: UIDatePicker!
+    
+    var image = UIImage()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        load()
-    }
-    
-    func load() {
         
-        let stringURL = "https://api.nasa.gov/planetary/apod?date=2001-04-30&hd=true&api_key=dYH0lRMSlSXTg8fYucpDiHfUSIjghqrFKzMf6C3y"
-        let url = URL(string: stringURL)!
-        let session = URLSession.shared
-        let task = session.dataTask(with: url) { (data, response, error) in
-            do {
-                let decoder = JSONDecoder()
-                let apodData: Apod = try decoder.decode(Apod.self, from: data!)
-                
-                // Baixar imagem e atualizar imagemView
-                self.updateImage(apodData.hdurl)
-                
-            } catch {
-                print("Erro ao decodificar dados da API")
-            }
-        }
-        task.resume()
+        // Data maxima: data do dia atual
+        let maxDate = Date()
+        // Data minima: 28/06/1995
+        var minDate = Date(timeIntervalSince1970: (31536000*25)+(172*86400))
+
+        picker.maximumDate = maxDate
+        picker.minimumDate = minDate
+        
+        
     }
     
-    func updateImage(_ url:String) {
-        DispatchQueue.global().async {
-            let data: Data
-            do {
-                // Baixar conteúdo da url
-                data = try Data(contentsOf: URL(string: url)!)
-            } catch {
-                print("Erro ao tentar baixar imagem")
-                return
-            }
-            DispatchQueue.main.async {
-                self.imageView.image = UIImage(data: data)
-            }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showImage", case let nextVC = segue.destination as? ImageViewController {
+            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            print(formatter.string(from: picker.date))
+            nextVC?.dataString = formatter.string(from: picker.date)
+            
         }
     }
-
-
+    
+    
+    	
 }
